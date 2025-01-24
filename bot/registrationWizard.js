@@ -1,18 +1,7 @@
-const { Telegraf, Markup, Scenes, session } = require('telegraf');
-const { registerUser } = require('./user/service/userService');
-const RegisterUserDto = require('./user/dto/registerUserDto');
-const { Language, ReminderBefore } = require('./middleware/constants');
-const TG_TOKEN = process.env.TG_TOKEN;
+const { Markup, Scenes } = require('telegraf');
+const { registerUser } = require('../user/service/userService');
+const RegisterUserDto = require('../user/dto/registerUserDto');
 
-if (!TG_TOKEN) {
-    console.error('TG_TOKEN is not set in environment');
-    process.exit(1);
-}
-
-const botTest = new Telegraf(TG_TOKEN);
-
-// Define registration scene
-//todo translate ru/en
 const registrationWizard = new Scenes.WizardScene(
     'registration-wizard',
     (ctx) => {
@@ -27,9 +16,9 @@ const registrationWizard = new Scenes.WizardScene(
             const lang = ctx.callbackQuery.data.split('_')[1];
             ctx.wizard.state.language = lang;
             ctx.reply('Когда напоминать?', Markup.inlineKeyboard([
-                Markup.button.callback('За 5 минут', 'remind_5M'),
-                Markup.button.callback('За 1 час', 'remind_1H'),
-                Markup.button.callback('За 1 день', 'remind_1D'),
+                Markup.button.callback('5 минут', 'remind_5M'),
+                Markup.button.callback('1 час', 'remind_1H'),
+                Markup.button.callback('1 день', 'remind_1D'),
             ]));
             return ctx.wizard.next();
         } else {
@@ -49,12 +38,11 @@ const registrationWizard = new Scenes.WizardScene(
             });
 
             try {
-                const user = await registerUser(dto);
+                await registerUser(dto);
                 ctx.reply('Вы успешно зарегистрированы!');
             } catch (error) {
                 ctx.reply(`Ошибка при регистрации: ${error.message}`);
             }
-
             return ctx.scene.leave();
         } else {
             ctx.reply('Пожалуйста, выберите время напоминания, используя кнопки.');
@@ -63,22 +51,4 @@ const registrationWizard = new Scenes.WizardScene(
     }
 );
 
-const stage = new Scenes.Stage([registrationWizard]);
-
-botTest.use(session());
-botTest.use(stage.middleware());
-
-botTest.start((ctx) => ctx.scene.enter('registration-wizard'));
-
-botTest.command('hello', async (ctx) => {
-    await ctx.reply('Шалом');
-});
-
-botTest.launch()
-    .then(() => console.log('Telegram bot connected'))
-    .catch((err) => console.error('Error launching bot:', err));
-
-process.once('SIGINT', () => botTest.stop('SIGINT'));
-process.once('SIGTERM', () => botTest.stop('SIGTERM'));
-
-module.exports = botTest;
+module.exports = registrationWizard;
