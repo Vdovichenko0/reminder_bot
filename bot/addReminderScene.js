@@ -71,7 +71,6 @@ const addReminderScene = new Scenes.WizardScene(
     }
 );
 
-
 // check add
 addReminderScene.action('confirm_add_reminder', async (ctx) => {
     if (!ctx.session.newReminder) {

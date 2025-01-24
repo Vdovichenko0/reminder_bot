@@ -142,7 +142,6 @@ setInterval(() => {
     sendScheduledMessages(botTest);
 }, 60000);
 
-
 //exit
 botTest.action('exit_delete_menu', async (ctx) => {
     ctx.reply("🚀",mainMenuKeyboard);
