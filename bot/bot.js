@@ -2,12 +2,12 @@ const { Telegraf, Markup, Scenes, session } = require('telegraf');
 const registrationWizard = require('./registrationWizard');
 const addReminderScene = require('./addReminderScene');
 const { getAllReminders, deleteReminder, sendScheduledMessages} = require('../user/service/userService');
-const { deleteLastMessages } = require("./deleteLastMessages")
 const User = require('../user/model/User');
 
 const TG_TOKEN = process.env.TG_TOKEN;
 const ADMIN_ID = process.env.ADMIN_TG;
 const ADMIN_COMMAND = process.env.ADMIN_MESSAGE;
+
 if (!TG_TOKEN) {
     console.error('❌ TG_TOKEN is not set in environment');
     process.exit(1);
