@@ -44,7 +44,7 @@ const addReminderScene = new Scenes.WizardScene(
         }
 
         const [, day, month, year, hour, minute, text] = match;
-        const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00Z`);
+        const date = `${day}.${month}.${year} ${hour}:${minute}`;
 
         const telegramId = ctx.from.id.toString();
         const validation = await validateReminderDate({ telegramId, date });

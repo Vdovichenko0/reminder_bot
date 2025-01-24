@@ -1,10 +1,11 @@
 const { Language, ReminderBefore } = require('../../middleware/constants');
-
+const moment = require('moment-timezone');
 class RegisterUserDto {
-    constructor({ telegramId, language = Language.RU, reminderBefore = ReminderBefore.ONE_HOUR }) {
+    constructor({ telegramId, language = Language.RU, reminderBefore = ReminderBefore.ONE_HOUR, timezone}) {
         this.telegramId = telegramId;
         this.language = language;
         this.reminderBefore = reminderBefore;
+        this.timezone = timezone;
     }
 
     validate() {
@@ -23,6 +24,10 @@ class RegisterUserDto {
         const validReminderBefore = Object.values(ReminderBefore);
         if (this.reminderBefore && !validReminderBefore.includes(this.reminderBefore)) {
             errors.reminderBefore = `ReminderBefore must be one of: ${validReminderBefore.join(', ')}`;
+        }
+
+        if (!this.timezone || typeof this.timezone !== 'string' || !moment.tz.zone(this.timezone)) {
+            errors.timezone = '❌ Timezone is invalid or missing. Please provide a valid timezone.';
         }
 
         return {

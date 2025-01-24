@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema({
         },
         default: {},
     },
+    timezone: {
+        type: String,
+        default: "UTC"
+    }
+
 });
 
 module.exports = mongoose.model('User', userSchema, "user-reminder-bot-express");
