@@ -1,0 +1,8 @@
+{
+  "welcome": "Welcome! Please choose your language:",
+  "choose_language": "Choose your language:",
+  "choose_reminder": "When would you like to be reminded?",
+  "registration_success": "You have been successfully registered!",
+  "registration_error": "Error during registration: {{error}}",
+  "hello_message": "Shalom"
+}

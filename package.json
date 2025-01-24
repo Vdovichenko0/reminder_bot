@@ -1,0 +1,36 @@
+{
+  "name": "my-reminder-bot",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node ./bin/www",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@types/mongoose": "^5.11.96",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.1",
+    "http-errors": "~1.6.3",
+    "i18next": "^24.2.1",
+    "i18next-fs-backend": "^2.6.0",
+    "mongoose": "^8.9.5",
+    "morgan": "~1.9.1",
+    "node-fetch": "^3.3.2",
+    "node-telegram-bot-api": "^0.63.0",
+    "pug": "^3.0.3",
+    "telegraf": "^4.16.3",
+    "telegraf-i18next": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.10"
+  }
+}
