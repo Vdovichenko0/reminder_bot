@@ -173,8 +173,8 @@ const sendScheduledMessages = async (bot) => {
         const users = await User.find({});
 
         for (const user of users) {
-            console.log(`---------------------------------------------------`);
-            console.log(`👤 User: ${user.telegramId}`);
+            //console.log(`---------------------------------------------------`);
+            //console.log(`👤 User: ${user.telegramId}`);
 
             if (!user || !user.reminders || user.reminders.size === 0) {
                 console.log(`🔍 The user has no reminders.`);
@@ -184,8 +184,8 @@ const sendScheduledMessages = async (bot) => {
             const userTimezone = user.timezone || "UTC";
             const nowUser = moment().tz(userTimezone);
 
-            console.log(`🌍 User's timezone: ${userTimezone}`);
-            console.log(`⏳ Current time (User's timezone): ${nowUser.format('YYYY-MM-DD HH:mm:ss')}`);
+            //console.log(`🌍 User's timezone: ${userTimezone}`);
+            //console.log(`⏳ Current time (User's timezone): ${nowUser.format('YYYY-MM-DD HH:mm:ss')}`);
 
             const remindersArray = [...user.reminders.values()].map(reminder => ({
                 id: reminder._id.toString(),
@@ -196,7 +196,7 @@ const sendScheduledMessages = async (bot) => {
             const validReminders = remindersArray.filter(reminder => reminder.date.isValid());
 
             if (validReminders.length === 0) {
-                console.log(`🔍 The user has no valid reminders.`);
+                //console.log(`🔍 The user has no valid reminders.`);
                 continue;
             }
 
@@ -223,9 +223,9 @@ const sendScheduledMessages = async (bot) => {
 
                 const notifyTimeUser = reminderTimeUser.clone().subtract(notifyBeforeMs, 'milliseconds');
 
-                console.log(`📆 Event date (User's timezone): ${reminderTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
-                console.log(`📩 Notification time (User's timezone): ${notifyTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
-                console.log("--------------");
+                //console.log(`📆 Event date (User's timezone): ${reminderTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
+                //console.log(`📩 Notification time (User's timezone): ${notifyTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
+               // console.log("--------------");
                 if (Math.abs(notifyTimeUser.diff(nowUser, 'minutes')) <= 1) {
                     await bot.telegram.sendMessage(
                         user.telegramId,
