@@ -6,6 +6,30 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    firstName: {
+        type: String,
+        default: null,
+    },
+    lastName: {
+        type: String,
+        default: null,
+    },
+    username: {
+        type: String,
+        default: null,
+    },
+    phoneNumber: {
+        type: String,
+        default: null,
+    },
+    isBot: {
+        type: Boolean,
+        default: false,
+    },
+    languageCode: {
+        type: String,
+        default: null,
+    },
     dateRegister: {
         type: Date,
         default: Date.now,

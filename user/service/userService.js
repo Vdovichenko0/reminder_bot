@@ -10,7 +10,7 @@ const registerUser = async (userRegisterDto) => {
         throw new Error(`Validation failed: ${errorMessages}`);
     }
 
-    const { telegramId, language, reminderBefore, timezone} = userRegisterDto;
+    const { telegramId, firstName, lastName, username, phoneNumber, language, reminderBefore, timezone, isBot, languageCode } = userRegisterDto;
     const existingUser = await User.findOne({ telegramId });
     if (existingUser) {
         throw new Error('User already exists with this telegramId: ' + telegramId);
@@ -18,11 +18,24 @@ const registerUser = async (userRegisterDto) => {
 
     const newUser = new User({
         telegramId,
+        firstName,
+        lastName,
+        username,
+        phoneNumber,
         language,
         reminderBefore,
-        timezone
-        // all other data set auto like dateRegister
+        timezone,
+        isBot,
+        languageCode
     });
+
+    // const newUser = new User({
+    //     telegramId,
+    //     language,
+    //     reminderBefore,
+    //     timezone
+    //     // all other data set auto like dateRegister
+    // });
 
     await newUser.save();
 
@@ -177,7 +190,7 @@ const sendScheduledMessages = async (bot) => {
             //console.log(`👤 User: ${user.telegramId}`);
 
             if (!user || !user.reminders || user.reminders.size === 0) {
-                console.log(`🔍 The user has no reminders.`);
+                // console.log(`🔍 The user has no reminders.`);
                 continue;
             }
 
@@ -237,7 +250,7 @@ const sendScheduledMessages = async (bot) => {
                 }
             }
         }
-        console.log(`✅ Completed checking all users.`);
+        // console.log(`✅ Completed checking all users.`);
     } catch (error) {
         console.error("❌ Error processing reminders:", error);
     }
@@ -268,11 +281,59 @@ const deleteReminderById = async ({ telegramId, reminderId }) => {
     }
 };
 
+const updateReminderBefore = async ({ telegramId, time }) => {
+    try {
+        if (!['5M', '1H', '1D'].includes(time)) {
+            return { success: false, error: '❌ Недопустимое значение времени напоминания.' };
+        }
+
+        const user = await User.findOneAndUpdate(
+            { telegramId },
+            { $set: { reminderBefore: time } },
+            { new: true }
+        );
+
+        if (!user) {
+            return { success: false, error: '⚠️ Пользователь не найден.' };
+        }
+
+        return { success: true, message: `✅ Время напоминаний обновлено: ${time}` };
+    } catch (error) {
+        console.error('❌ Ошибка при обновлении времени напоминаний:', error);
+        return { success: false, error: '❌ Ошибка обновления времени напоминаний.' };
+    }
+};
+
+const updateTimezone = async ({ telegramId, timezone }) => {
+    try {
+        if (!moment.tz.zone(timezone)) {
+            return { success: false, error: '❌ Некорректный часовой пояс.' };
+        }
+
+        const user = await User.findOneAndUpdate(
+            { telegramId },
+            { $set: { timezone } },
+            { new: true }
+        );
+
+        if (!user) {
+            return { success: false, error: '⚠️ Пользователь не найден.' };
+        }
+
+        return { success: true, message: `✅ Часовой пояс обновлён: ${timezone}` };
+    } catch (error) {
+        console.error('❌ Ошибка при обновлении часового пояса:', error);
+        return { success: false, error: '❌ Ошибка обновления часового пояса.' };
+    }
+};
+
 module.exports = {
     registerUser,
     addReminder,
     getAllReminders,
     validateReminderDate,
     deleteReminder,
-    sendScheduledMessages
+    sendScheduledMessages,
+    updateReminderBefore,
+    updateTimezone
 };

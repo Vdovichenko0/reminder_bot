@@ -83,10 +83,17 @@ const registrationWizard = new Scenes.WizardScene(
 
         const dto = new RegisterUserDto({
             telegramId: ctx.from.id.toString(),
+            firstName: ctx.from.first_name || null,
+            lastName: ctx.from.last_name || null,
+            username: ctx.from.username || null,
+            phoneNumber: ctx.from.contact ? ctx.from.contact.phone_number : null,
             language: ctx.wizard.state.language,
             reminderBefore: ctx.wizard.state.reminderBefore,
-            timezone
+            timezone,
+            isBot: ctx.from.is_bot,
+            languageCode: ctx.from.language_code || null
         });
+        console.log(ctx.from.language_code);
 
         try {
             await registerUser(dto);

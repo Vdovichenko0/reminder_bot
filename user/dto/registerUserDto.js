@@ -1,19 +1,41 @@
 const { Language, ReminderBefore } = require('../../middleware/constants');
 const moment = require('moment-timezone');
 class RegisterUserDto {
-    constructor({ telegramId, language = Language.RU, reminderBefore = ReminderBefore.ONE_HOUR, timezone}) {
+    constructor({ telegramId, firstName, lastName, username, phoneNumber, language = Language.RU, reminderBefore = ReminderBefore.ONE_HOUR, timezone, isBot, languageCode }) {
         this.telegramId = telegramId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
+        this.phoneNumber = phoneNumber;
         this.language = language;
         this.reminderBefore = reminderBefore;
         this.timezone = timezone;
+        this.isBot = isBot;
+        this.languageCode = languageCode;
     }
+
 
     validate() {
         const errors = {};
 
-        // Валидация telegramId
         if (!this.telegramId || typeof this.telegramId !== 'string') {
             errors.telegramId = 'Telegram ID is required and must be a string.';
+        }
+
+        if (this.firstName && typeof this.firstName !== 'string') {
+            errors.firstName = 'First name must be a string.';
+        }
+
+        if (this.lastName && typeof this.lastName !== 'string') {
+            errors.lastName = 'Last name must be a string.';
+        }
+
+        if (this.username && typeof this.username !== 'string') {
+            errors.username = 'Username must be a string.';
+        }
+
+        if (this.phoneNumber && typeof this.phoneNumber !== 'string') {
+            errors.phoneNumber = 'Phone number must be a string.';
         }
 
         const validLanguages = Object.values(Language);

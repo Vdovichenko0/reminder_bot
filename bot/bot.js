@@ -1,12 +1,15 @@
 const { Telegraf, Markup, Scenes, session } = require('telegraf');
 const registrationWizard = require('./registrationWizard');
 const addReminderScene = require('./addReminderScene');
+const settingsWizard = require("./settingsWizard")
+const adminMediaScene  = require('./adminMediaScene');
 const { getAllReminders, deleteReminder, sendScheduledMessages} = require('../user/service/userService');
 const User = require('../user/model/User');
 
 const TG_TOKEN = process.env.TG_TOKEN;
 const ADMIN_ID = process.env.ADMIN_TG;
 const ADMIN_COMMAND = process.env.ADMIN_MESSAGE;
+const ADMIN_COMMAND_MEDIA = process.env.ADMIN_COMMAND_MEDIA;
 
 if (!TG_TOKEN) {
     console.error('❌ TG_TOKEN is not set in environment');
@@ -17,8 +20,13 @@ if (!TG_TOKEN) {
 const botTest = new Telegraf(TG_TOKEN);
 botTest.use(session());
 
-// 🎛
-const stage = new Scenes.Stage([registrationWizard, addReminderScene]);
+// wizards/scene
+const stage = new Scenes.Stage([
+    registrationWizard,
+    addReminderScene,
+    settingsWizard,
+    adminMediaScene
+]);
 botTest.use(stage.middleware());
 
 // Middleware for log users messages
@@ -32,7 +40,6 @@ botTest.on('message', async (ctx, next) => {
     await next();
 });
 
-
 // 📌
 const mainMenuKeyboard = Markup.keyboard([
     ['➕ Добавить напоминание'],
@@ -42,6 +49,14 @@ const mainMenuKeyboard = Markup.keyboard([
 
 botTest.hears('➕ Добавить напоминание', (ctx) => {
     ctx.scene.enter('add-reminder');
+});
+
+botTest.command(ADMIN_COMMAND_MEDIA, (ctx) => {
+    ctx.scene.enter('admin-media');
+});
+
+botTest.command('settings', (ctx) => {
+    ctx.scene.enter('settings');
 });
 
 botTest.hears('❌ Удалить напоминание', async (ctx) => {
