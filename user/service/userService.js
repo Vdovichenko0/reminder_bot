@@ -109,14 +109,14 @@ const validateReminderDate = async ({ telegramId, date }) => {
 const getAllReminders = async ({ telegramId }) => {
     try {
         const user = await User.findOne({ telegramId });
-        console.log(user);
+        // console.log(user);
 
         if (!user || !user.reminders || user.reminders.size === 0) {
             return { success: false, error: '🔍 У вас пока нет напоминаний.' };
         }
 
         const userTimezone = user.timezone || 'UTC';
-        console.log(`Timezone of user: ${userTimezone}`);
+        // console.log(`Timezone of user: ${userTimezone}`);
 
         const remindersArray = Array.from(user.reminders.entries()).map(([key, reminder]) => {
             if (!reminder.date) return null;
@@ -124,13 +124,14 @@ const getAllReminders = async ({ telegramId }) => {
             const utcMoment = moment.utc(reminder.date); // UTC
             const userMoment = utcMoment.clone().tz(userTimezone); // timezone
 
-            console.log('📅 Original date (UTC):', utcMoment.format());
-            console.log('🌍 Date in user’s timezone:', userMoment.format('YYYY-MM-DD HH:mm:ss Z'));
+            // console.log('📅 Original date (UTC):', utcMoment.format());
+            // console.log('🌍 Date in user’s timezone:', userMoment.format('YYYY-MM-DD HH:mm:ss Z'));
 
             return {
                 date: userMoment.format('DD.MM.YYYY HH:mm'),
                 message: reminder.message,
-                key: key
+                key: key,
+                id: reminder._id.toString(),
             };
         }).filter(Boolean);
 
@@ -144,7 +145,7 @@ const getAllReminders = async ({ telegramId }) => {
 
         return { success: true, reminders: remindersArray };
     } catch (error) {
-        console.error('Error fetching reminders:', error);
+        // console.error('Error fetching reminders:', error);
         return { success: false, error: '❌ Ошибка получения напоминаний. Попробуйте снова.' };
     }
 };

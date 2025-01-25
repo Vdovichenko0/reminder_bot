@@ -21,6 +21,18 @@ botTest.use(session());
 const stage = new Scenes.Stage([registrationWizard, addReminderScene]);
 botTest.use(stage.middleware());
 
+// Middleware for log users messages
+botTest.on('message', async (ctx, next) => {
+    const telegramId = ctx.from.id.toString();
+    const username = ctx.from.username ? `@${ctx.from.username}` : ctx.from.first_name;
+    const message = ctx.message.text || '[not text message]';
+
+    console.log(`📩 Message from ${telegramId} (${username}): ${message}`);
+
+    await next();
+});
+
+
 // 📌
 const mainMenuKeyboard = Markup.keyboard([
     ['➕ Добавить напоминание'],
@@ -59,7 +71,8 @@ botTest.hears('❌ Удалить напоминание', async (ctx) => {
 botTest.action(/^delete_(.*)$/, async (ctx) => {
     const telegramId = ctx.from.id.toString();
     const keyToDelete = ctx.match[1]; //('2025-01-24T06:05:00_000Z')
-
+    //const reminderId = ctx.match[1]; // type to delete, rom key map to id
+    console.log(keyToDelete)
     const result = await deleteReminder({ telegramId, key: keyToDelete });
 
     if (!result.success) {

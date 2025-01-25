@@ -3,6 +3,12 @@ const { registerUser } = require('../user/service/userService');
 const RegisterUserDto = require('../user/dto/registerUserDto');
 const moment = require('moment-timezone');
 
+const mainMenuKeyboard = Markup.keyboard([
+    ['➕ Добавить напоминание'],
+    ['❌ Удалить напоминание'],
+    ['📋 Все напоминания']
+]).resize();
+
 const registrationWizard = new Scenes.WizardScene(
     'registration-wizard',
     (ctx) => {
@@ -84,7 +90,7 @@ const registrationWizard = new Scenes.WizardScene(
 
         try {
             await registerUser(dto);
-            ctx.reply(`✅ Вы успешно зарегистрированы!`);
+            ctx.reply(`✅ Вы успешно зарегистрированы!`, mainMenuKeyboard);
         } catch (error) {
             ctx.reply(`❌ Ошибка при регистрации: ${error.message}`);
         }
