@@ -22,7 +22,7 @@ const registrationWizard = new Scenes.WizardScene(
         if (ctx.callbackQuery && ctx.callbackQuery.data.startsWith('lang_')) {
             const lang = ctx.callbackQuery.data.split('_')[1];
             ctx.wizard.state.language = lang;
-            ctx.reply('Когда напоминать?', Markup.inlineKeyboard([
+            ctx.reply('Напомнить за?', Markup.inlineKeyboard([
                 Markup.button.callback('5 минут', 'remind_5M'),
                 Markup.button.callback('1 час', 'remind_1H'),
                 Markup.button.callback('1 день', 'remind_1D'),

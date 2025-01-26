@@ -11,7 +11,7 @@ var app = express();
 const connectDB = require('./config/db');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
-const botRoutes = require('./bot/bot');
+const botRoutes = require('./routes/tg-bot');
 
 connectDB();
 app.use(mongoSanitize());
@@ -28,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/bot', botRoutes);
 
 require('./bot/bot');
 

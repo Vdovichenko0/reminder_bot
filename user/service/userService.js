@@ -1,6 +1,6 @@
 const User = require('../model/User');
 const moment = require('moment-timezone');
-const { bot } = require('../../bot/bot');
+const sanitizeHtml = require('sanitize-html');
 
 const registerUser = async (userRegisterDto) => {
     const { isValid, errors } = userRegisterDto.validate();
@@ -44,13 +44,23 @@ const registerUser = async (userRegisterDto) => {
 
 const addReminder = async ({ telegramId, date, text }) => {
     try {
+        const bot= require('../../bot/bot');
+
+        if (!bot || !bot.telegram) {
+            throw new Error('❌ Error bot not initialized');
+        }
+
         const user = await User.findOne({ telegramId });
         if (!user) {
             return { success: false, error: '❌ Пользователь не найден.' };
         }
 
-        const userTimezone = user.timezone || 'UTC';
+        const safeText = sanitizeHtml(text, {
+            allowedTags: [],
+            allowedAttributes: {}
+        });
 
+        const userTimezone = user.timezone || 'UTC';
         const localMoment = moment.tz(date, 'DD.MM.YYYY HH:mm', userTimezone);
         const utcMoment = localMoment.clone().utc();
 
@@ -58,14 +68,9 @@ const addReminder = async ({ telegramId, date, text }) => {
             return { success: false, error: '❌ Некорректная дата.' };
         }
 
-        // console.log('🕒 Local time:', localMoment.format('YYYY-MM-DD HH:mm:ss Z'));
-        // console.log('🌐 UTC:', utcMoment.format('YYYY-MM-DD HH:mm:ss Z'));
-
-        // console.log(`📤 save: ${telegramId} - ${utcMoment.format('DD.MM.YYYY HH:mm')} - ${text}`);
-
         const reminderData = {
             date: utcMoment.toDate(),
-            message: text
+            message: safeText
         };
 
         const key = utcMoment.toISOString().replace(/\./g, '_');
@@ -76,12 +81,18 @@ const addReminder = async ({ telegramId, date, text }) => {
             { upsert: true, new: true }
         );
 
+        await bot.telegram.sendMessage(
+            user.telegramId,
+            `⏰ Напоминание добавлено: \n*${date}*\n${safeText}`,
+            { parse_mode: 'Markdown' }
+        );
+
         return { success: true };
     } catch (error) {
-        console.error('Error save data:', error);
         return { success: false, error: '❌ Ошибка сохранения. Попробуйте снова.' };
     }
 };
+
 
 const validateReminderDate = async ({ telegramId, date }) => {
     console.log("start here")

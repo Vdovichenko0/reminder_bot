@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Добавить Напоминание</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #f6f7fb, #e2e5ec);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 5px 0 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+        }
+        #submitBtn {
+            background: #007bff;
+            color: white;
+        }
+        #submitBtn:hover {
+            background: #0056b3;
+        }
+        #cancelBtn {
+            background: #ec515e;
+            color: white;
+        }
+        #cancelBtn:hover {
+            background: #e36275;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            display: none;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #007bff;
+        }
+
+        /* === Адаптивная верстка === */
+        @media (max-width: 768px) {
+            .container {
+                max-width: 90%;
+                padding: 15px;
+            }
+            .date-container {
+                flex-direction: row;
+                align-items: center;
+            }
+            input {
+                font-size: 14px;
+                padding: 8px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #labelDate{
+                /*margin-bottom: -25px;*/
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 95%;
+                padding: 10px;
+                border-radius: 10px;
+            }
+            h2 {
+                font-size: 18px;
+            }
+            .date-container {
+                flex-direction: row;
+                align-items: center;
+                gap: 5px;
+            }
+            input {
+                font-size: 14px;
+                padding: 6px;
+            }
+            .button-group {
+                flex-direction: column;
+                gap: 5px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            #labelDate{
+                /*margin-bottom: -25px;*/
+            }
+        }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+
+
+<div class="container">
+    <h2>Добавить Напоминание</h2>
+    <form id="reminderForm">
+        <label id="labelDate" for="date">Дата и время:</label>
+        <input type="datetime-local" id="date" name="date" required>
+
+        <label for="text">Текст напоминания:</label>
+        <input type="text" id="text" name="text" placeholder="Например: Позвонить врачу" required>
+
+        <div class="button-group">
+            <button type="submit" id="submitBtn">✅ Отправить</button>
+            <button type="button" id="cancelBtn">❌ Отмена</button>
+        </div>
+    </form>
+    <div id="message" class="message"></div>
+    <div class="loading" id="loading">⏳ Отправка...</div>
+</div>
+
+<script>
+    const TelegramWebApp = window.Telegram.WebApp;
+    //get tg from url
+    function getQueryParams() {
+        const params = {};
+        window.location.search.substring(1).split('&').forEach(pair => {
+            const [key, value] = pair.split('=');
+            if (key) {
+                params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+            }
+        });
+        return params;
+    }
+
+    const params = getQueryParams();
+    const telegramId = params.telegramId;
+
+    if (!telegramId) {
+        alert('Ошибка: Отсутствует идентификатор Telegram.');
+        throw new Error('Missing telegramId');
+    }
+
+    document.getElementById('reminderForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const dateInput = document.getElementById('date').value;
+        const textInput = sanitizeInput(document.getElementById('text').value.trim());
+        const loading = document.getElementById('loading');
+
+        if (!dateInput || !textInput) {
+            showMessage('❌ Пожалуйста, заполните все поля.', 'error');
+            return;
+        }
+
+        const selectedDate = new Date(dateInput);
+        const currentDate = new Date();
+
+        if (selectedDate <= currentDate) {
+            showMessage('❌ Дата должна быть в будущем!', 'error');
+            return;
+        }
+
+        loading.style.display = 'block';
+
+        const formattedDate = `${String(selectedDate.getDate()).padStart(2, '0')}.${String(selectedDate.getMonth() + 1).padStart(2, '0')}.${selectedDate.getFullYear()} ${String(selectedDate.getHours()).padStart(2, '0')}:${String(selectedDate.getMinutes()).padStart(2, '0')}`;
+
+        const reminderData = {
+            telegramId: telegramId,
+            date: formattedDate,
+            text: textInput
+        };
+
+        console.log('Отправка данных на сервер:', reminderData);
+
+        fetch('https://640c-2a00-a041-e51e-a400-ad84-104a-97d3-7802.ngrok-free.app/bot/addReminder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(reminderData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    showMessage('✅ Напоминание успешно добавлено!', 'success');
+
+                    // close WebApp
+                    setTimeout(() => {
+                        TelegramWebApp.close();
+                    }, 1500);
+                } else {
+                    showMessage(`❌ ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Ошибка при отправке данных:', error);
+                showMessage('❌ Произошла ошибка при добавлении напоминания.', 'error');
+            });
+    });
+
+
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+        TelegramWebApp.close();
+    });
+
+    function showMessage(message, type) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = message;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = 'block';
+    }
+
+    function sanitizeInput(input) {
+        return input.replace(/[<>\/"'&]/g, (char) => {
+            const entityMap = {
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;',
+                '&': '&amp;',
+                '/': '&#x2F;'
+            };
+            return entityMap[char];
+        });
+    }
+
+    TelegramWebApp.expand();
+</script>
+
+</body>
+</html>

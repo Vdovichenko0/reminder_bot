@@ -47,8 +47,21 @@ const mainMenuKeyboard = Markup.keyboard([
     ['📋 Все напоминания']
 ]).resize();
 
-botTest.hears('➕ Добавить напоминание', (ctx) => {
-    ctx.scene.enter('add-reminder');
+// botTest.hears('➕ Добавить напоминание', (ctx) => {
+//     ctx.scene.enter('add-reminder');
+// });
+
+const ADD_REMINDER_URL = 'https://640c-2a00-a041-e51e-a400-ad84-104a-97d3-7802.ngrok-free.app/webapp.html';
+botTest.hears('➕ Добавить напоминание', async (ctx) => {
+    const telegramId = ctx.from.id.toString();
+    const urlWithParams = `${ADD_REMINDER_URL}?telegramId=${telegramId}`;
+
+    await ctx.reply(
+        '📅 Откройте мини-приложение и добавьте напоминание:',
+        Markup.inlineKeyboard([
+            [Markup.button.webApp('🗓 Открыть WebApp', urlWithParams)]
+        ])
+    );
 });
 
 botTest.command(ADMIN_COMMAND_MEDIA, (ctx) => {

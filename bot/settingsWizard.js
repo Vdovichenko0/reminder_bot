@@ -25,7 +25,7 @@ const settingsWizard = new Scenes.WizardScene(
 
         if (text === '⏳ Изменить время напоминаний') {
             await ctx.reply(
-                'Когда напоминать?',
+                'Напомнить за?',
                 Markup.inlineKeyboard([
                     [Markup.button.callback('5 минут', 'remind_5M')],
                     [Markup.button.callback('1 час', 'remind_1H')],
