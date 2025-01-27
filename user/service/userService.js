@@ -43,6 +43,7 @@ const registerUser = async (userRegisterDto) => {
 };
 
 const addReminder = async ({ telegramId, date, text }) => {
+    console.log("here 1")
     try {
         const bot= require('../../bot/bot');
 
@@ -87,6 +88,7 @@ const addReminder = async ({ telegramId, date, text }) => {
             { parse_mode: 'Markdown' }
         );
 
+        console.log("reminder added success");
         return { success: true };
     } catch (error) {
         return { success: false, error: '❌ Ошибка сохранения. Попробуйте снова.' };

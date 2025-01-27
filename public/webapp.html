@@ -174,7 +174,7 @@
 </div>
 
 <script>
-    const MY_URL = process.env.MY_URL;
+    const MY_URL = "https://lips-residential-services-endorsed.trycloudflare.com";
     const TelegramWebApp = window.Telegram.WebApp;
     //get tg from url
     function getQueryParams() {
@@ -226,7 +226,6 @@
             text: textInput
         };
 
-        console.log('Отправка данных на сервер:', reminderData);
 
         fetch(`${MY_URL}/bot/addReminder`, {
             method: 'POST',
@@ -251,11 +250,10 @@
             })
             .catch(error => {
                 loading.style.display = 'none';
-                console.error('Ошибка при отправке данных:', error);
                 showMessage('❌ Произошла ошибка при добавлении напоминания.', 'error');
             });
     });
-
+    console.log(`${MY_URL}/bot/addReminder`)
 
     document.getElementById('cancelBtn').addEventListener('click', () => {
         TelegramWebApp.close();
