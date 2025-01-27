@@ -10,6 +10,7 @@ const TG_TOKEN = process.env.TG_TOKEN;
 const ADMIN_ID = process.env.ADMIN_TG;
 const ADMIN_COMMAND = process.env.ADMIN_MESSAGE;
 const ADMIN_COMMAND_MEDIA = process.env.ADMIN_COMMAND_MEDIA;
+const MY_URL = process.env.MY_URL;
 
 if (!TG_TOKEN) {
     console.error('❌ TG_TOKEN is not set in environment');
@@ -51,7 +52,7 @@ const mainMenuKeyboard = Markup.keyboard([
 //     ctx.scene.enter('add-reminder');
 // });
 
-const ADD_REMINDER_URL = 'https://640c-2a00-a041-e51e-a400-ad84-104a-97d3-7802.ngrok-free.app/webapp.html';
+const ADD_REMINDER_URL = `${MY_URL}/webapp.html`;
 botTest.hears('➕ Добавить напоминание', async (ctx) => {
     const telegramId = ctx.from.id.toString();
     const urlWithParams = `${ADD_REMINDER_URL}?telegramId=${telegramId}`;
