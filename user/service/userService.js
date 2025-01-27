@@ -95,7 +95,6 @@ const addReminder = async ({ telegramId, date, text }) => {
     }
 };
 
-
 const validateReminderDate = async ({ telegramId, date }) => {
     console.log("start here")
     try {
@@ -199,8 +198,8 @@ const sendScheduledMessages = async (bot) => {
         const users = await User.find({});
 
         for (const user of users) {
-            //console.log(`---------------------------------------------------`);
-            //console.log(`👤 User: ${user.telegramId}`);
+            // console.log(`---------------------------------------------------`);
+            // console.log(`👤 User: ${user.telegramId}`);
 
             if (!user || !user.reminders || user.reminders.size === 0) {
                 // console.log(`🔍 The user has no reminders.`);
@@ -210,12 +209,12 @@ const sendScheduledMessages = async (bot) => {
             const userTimezone = user.timezone || "UTC";
             const nowUser = moment().tz(userTimezone);
 
-            //console.log(`🌍 User's timezone: ${userTimezone}`);
-            //console.log(`⏳ Current time (User's timezone): ${nowUser.format('YYYY-MM-DD HH:mm:ss')}`);
+            // console.log(`🌍 User's timezone: ${userTimezone}`);
+            // console.log(`⏳ Current time (User's timezone): ${nowUser.format('YYYY-MM-DD HH:mm:ss')}`);
 
             const remindersArray = [...user.reminders.values()].map(reminder => ({
                 id: reminder._id.toString(),
-                date: moment.utc(reminder.date),  // ❗ The date is stored in UTC in the database
+                date: moment.utc(reminder.date),  //  The date is stored in UTC in the database
                 message: reminder.message
             }));
 
@@ -235,22 +234,22 @@ const sendScheduledMessages = async (bot) => {
                 let notifyBeforeMs;
                 switch (user.reminderBefore) {
                     case '5M':
-                        notifyBeforeMs = 5 * 60 * 1000; // 5 минут
+                        notifyBeforeMs = 5 * 60 * 1000; // 5 min
                         break;
                     case '1H':
-                        notifyBeforeMs = 60 * 60 * 1000; // 1 час
+                        notifyBeforeMs = 60 * 60 * 1000; // 1 hour
                         break;
                     case '1D':
-                        notifyBeforeMs = 24 * 60 * 60 * 1000; // 1 день
+                        notifyBeforeMs = 24 * 60 * 60 * 1000; // 1 day
                         break;
                     default:
-                        notifyBeforeMs = 60 * 60 * 1000; // По умолчанию 1 час
+                        notifyBeforeMs = 60 * 60 * 1000; // by def 1 hour
                 }
 
                 const notifyTimeUser = reminderTimeUser.clone().subtract(notifyBeforeMs, 'milliseconds');
 
-                //console.log(`📆 Event date (User's timezone): ${reminderTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
-                //console.log(`📩 Notification time (User's timezone): ${notifyTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
+               //  console.log(`📆 Event date (User's timezone): ${reminderTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
+               //  console.log(`📩 Notification time (User's timezone): ${notifyTimeUser.format('YYYY-MM-DD HH:mm:ss')}`);
                // console.log("--------------");
                 if (Math.abs(notifyTimeUser.diff(nowUser, 'minutes')) <= 1) {
                     await bot.telegram.sendMessage(
@@ -258,8 +257,8 @@ const sendScheduledMessages = async (bot) => {
                         `⏰ Reminder (${user.reminderBefore} before the event): ${reminder.message}`
                     );
                     await deleteReminderById({ telegramId: user.telegramId, reminderId: reminder.id });
-                    console.log(`✅ Напоминание отправлено пользователю ${user.telegramId}`);
-                    console.log(`🗑 Напоминание удалено: ${reminder.id}`);
+                    console.log(`✅ Reminder send: ${user.telegramId}`);
+                    console.log(`🗑 Reminder delete: ${reminder.id}`);
                 }
             }
         }
