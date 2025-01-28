@@ -55,6 +55,14 @@ const userSchema = new mongoose.Schema({
                 type: String,
                 required: true,
             },
+            isSendNotify: {
+                type: Boolean,
+                default: false,
+            },
+            isSendNotifyNow: {
+                type: Boolean,
+                default: false,
+            },
         },
         default: {},
     },
