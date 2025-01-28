@@ -5,7 +5,7 @@ const settingsWizard = require("./settingsWizard")
 const adminMediaScene  = require('./adminMediaScene');
 const { getAllReminders, deleteReminder, sendScheduledMessages} = require('../user/service/userService');
 const User = require('../user/model/User');
-
+require('dotenv').config();
 const TG_TOKEN = process.env.TG_TOKEN;
 const ADMIN_ID = process.env.ADMIN_TG;
 const ADMIN_COMMAND = process.env.ADMIN_MESSAGE;
