@@ -252,12 +252,14 @@ botTest.catch((err) => {
 
 
 // 🏁
-botTest.launch()
-    .then(() => console.log('🚀 Telegram bot connected'))
-    .catch((err) => {
-        console.error('❌ Error launching bot:', err);
-        restartBot();
-    });
+setTimeout(() => {
+    botTest.launch()
+        .then(() => console.log("🚀 Telegram bot connected"))
+        .catch((err) => {
+            console.error('❌ Error launching bot:', err);
+            restartBot();
+        });
+}, 5000);
 
 // 📌
 process.once('SIGINT', () => {
