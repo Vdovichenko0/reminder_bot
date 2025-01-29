@@ -223,12 +223,23 @@ const restartBot = async () => {
     console.error("⚠️ Bot connection lost. Attempting to restart...");
 
     try {
+        console.log("🛑 Stopping bot...");
         await botTest.stop();
+        console.log("⏳ Waiting 5 seconds before restarting...");
         await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 sec before reconnecting
-        botTest.launch();
-        console.log("✅ Bot reconnected successfully!");
+
+        console.log("🔄 Reinitializing bot...");
+        botTest.launch()
+            .then(() => console.log("✅ Bot reconnected successfully!"))
+            .catch((error) => {
+                console.error("❌ Error relaunching bot:", error);
+                console.error("🔁 Retrying in 10 seconds...");
+                setTimeout(restartBot, 10000); // Retry in 10 sec
+            });
+
     } catch (error) {
         console.error("❌ Error during bot reconnection:", error);
+        console.error("🔁 Retrying in 10 seconds...");
         setTimeout(restartBot, 10000); // Retry in 10 sec
     }
 };
