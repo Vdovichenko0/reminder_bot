@@ -12,6 +12,8 @@ const ADMIN_COMMAND = process.env.ADMIN_MESSAGE;
 const ADMIN_COMMAND_MEDIA = process.env.ADMIN_COMMAND_MEDIA;
 const MY_URL = process.env.MY_URL;
 
+//todo auto reconnect if error - for deploy TG
+
 if (!TG_TOKEN) {
     console.error('❌ TG_TOKEN is not set in environment');
     process.exit(1);
@@ -216,10 +218,35 @@ botTest.command(ADMIN_COMMAND, async (ctx) => {
     }
 });
 
+// Function to restart bot on error
+const restartBot = async () => {
+    console.error("⚠️ Bot connection lost. Attempting to restart...");
+
+    try {
+        await botTest.stop();
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait 5 sec before reconnecting
+        botTest.launch();
+        console.log("✅ Bot reconnected successfully!");
+    } catch (error) {
+        console.error("❌ Error during bot reconnection:", error);
+        setTimeout(restartBot, 10000); // Retry in 10 sec
+    }
+};
+
+// Error handling and auto-reconnect
+botTest.catch((err) => {
+    console.error("❌ Error launching bot:", err);
+    restartBot();
+});
+
+
 // 🏁
 botTest.launch()
     .then(() => console.log('🚀 Telegram bot connected'))
-    .catch((err) => console.error('❌ Error launching bot:', err));
+    .catch((err) => {
+        console.error('❌ Error launching bot:', err);
+        restartBot();
+    });
 
 // 📌
 process.once('SIGINT', () => {
