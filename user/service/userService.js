@@ -53,7 +53,7 @@ const registerUser = async (userRegisterDto) => {
     return newUser;
 };
 
-const addReminder = async ({ telegramId, date, text }) => {
+const addReminder = async ({telegramId, date, text}) => {
     console.log("add reminder: here 1");
     try {
         const bot = require('../../bot/bot');
@@ -62,9 +62,9 @@ const addReminder = async ({ telegramId, date, text }) => {
             throw new Error('❌ Error bot not initialized');
         }
 
-        const user = await User.findOne({ telegramId });
+        const user = await User.findOne({telegramId});
         if (!user) {
-            return { success: false, error: '❌ Пользователь не найден.' };
+            return {success: false, error: '❌ Пользователь не найден.'};
         }
 
         const safeText = sanitizeHtml(text, {
@@ -77,7 +77,7 @@ const addReminder = async ({ telegramId, date, text }) => {
         const utcMoment = localMoment.clone().utc();
 
         if (!localMoment.isValid()) {
-            return { success: false, error: '❌ Некорректная дата.' };
+            return {success: false, error: '❌ Некорректная дата.'};
         }
 
         const nowUTC = moment.utc();
@@ -107,9 +107,12 @@ const addReminder = async ({ telegramId, date, text }) => {
         const key = utcMoment.toISOString().replace(/\./g, '_');
 
         const updatedUser = await User.findOneAndUpdate(
-            { telegramId },
-            { $set: { [`reminders.${key}`]: reminderData } },
-            { upsert: true, new: true }
+            {telegramId},
+            {
+                $set: {[`reminders.${key}`]: reminderData},
+                $inc: {countReminders: 1, countExistsReminders: 1}
+            },
+            {upsert: true, new: true}
         );
 
         // update `markModified`, if `reminders` - `Map`
@@ -121,14 +124,14 @@ const addReminder = async ({ telegramId, date, text }) => {
         await bot.telegram.sendMessage(
             user.telegramId,
             `⏰ Напоминание добавлено: \n*${date}*\n${safeText}`,
-            { parse_mode: 'Markdown' }
+            {parse_mode: 'Markdown'}
         );
 
         console.log("✅ Reminder added successfully");
-        return { success: true };
+        return {success: true};
     } catch (error) {
         console.error("❌ Error saving reminder:", error);
-        return { success: false, error: '❌ Ошибка сохранения. Попробуйте снова.' };
+        return {success: false, error: '❌ Ошибка сохранения. Попробуйте снова.'};
     }
 };
 
@@ -221,6 +224,9 @@ const deleteReminder = async ({telegramId, key}) => {
         }
 
         user.reminders.delete(key);
+        if (user.countExistsReminders > 0) {
+            user.countExistsReminders -= 1;
+        }
         await user.save();
 
         return {success: true};
@@ -353,9 +359,10 @@ const sendScheduledMessages = async (bot) => {
                     console.log(`⚠️ Delayed reminder sent: ${user.telegramId}`);
 
                     if (reminder.isSendNotify && reminder.isSendNotifyNow) {
-                        await deleteReminderById({ telegramId: user.telegramId, reminderId: reminder.id });
+                        await deleteReminderById({telegramId: user.telegramId, reminderId: reminder.id});
                         console.log(`🗑 Reminder deleted (delayed message was last): ${reminder.id}`);
-                    };
+                    }
+                    ;
                 }
             }
         }
@@ -381,6 +388,9 @@ const deleteReminderById = async ({telegramId, reminderId}) => {
         }
 
         user.reminders.delete(keyToDelete);
+        if (user.countExistsReminders > 0) {
+            user.countExistsReminders -= 1;
+        }
         await user.save();
 
         return {success: true};
@@ -390,16 +400,16 @@ const deleteReminderById = async ({telegramId, reminderId}) => {
     }
 };
 
-const updateReminderBefore = async ({ telegramId, time }) => {
+const updateReminderBefore = async ({telegramId, time}) => {
     try {
         if (!['5M', '1H', '1D'].includes(time)) {
-            return { success: false, error: '❌ Недопустимое значение времени напоминания.' };
+            return {success: false, error: '❌ Недопустимое значение времени напоминания.'};
         }
 
-        const user = await User.findOne({ telegramId });
+        const user = await User.findOne({telegramId});
 
         if (!user) {
-            return { success: false, error: '⚠️ Пользователь не найден.' };
+            return {success: false, error: '⚠️ Пользователь не найден.'};
         }
 
         const nowUTC = moment.utc();
@@ -416,7 +426,7 @@ const updateReminderBefore = async ({ telegramId, time }) => {
                 notifyThresholdMinutes = 1440; // 24 * 60
                 break;
             default:
-                return { success: false, error: '❌ Некорректное время напоминания.' };
+                return {success: false, error: '❌ Некорректное время напоминания.'};
         }
 
         user.reminderBefore = time;
@@ -441,10 +451,10 @@ const updateReminderBefore = async ({ telegramId, time }) => {
         user.markModified('reminders'); // update map
         await user.save();
 
-        return { success: true, message: `✅ Время напоминаний обновлено: ${time}` };
+        return {success: true, message: `✅ Время напоминаний обновлено: ${time}`};
     } catch (error) {
         console.error('❌ Error update reminders/time notify:', error);
-        return { success: false, error: '❌ Ошибка обновления времени напоминаний.' };
+        return {success: false, error: '❌ Ошибка обновления времени напоминаний.'};
     }
 };
 
@@ -471,20 +481,20 @@ const updateTimezone = async ({telegramId, timezone}) => {
     }
 };
 
-const setStatusNotify = async ({ telegramId, key, notify, notifyNow }) => {
+const setStatusNotify = async ({telegramId, key, notify, notifyNow}) => {
     try {
         // Find the user by Telegram ID
-        const user = await User.findOne({ telegramId });
+        const user = await User.findOne({telegramId});
 
         if (!user) {
             console.log(`❌ User not found: ${telegramId}`);
-            return { success: false, error: "User not found" };
+            return {success: false, error: "User not found"};
         }
 
         // Check if the reminder with the given key exists
         if (!user.reminders.has(key)) {
             console.log(`❌ Reminder not found for key: ${key}`);
-            return { success: false, error: "Reminder not found" };
+            return {success: false, error: "Reminder not found"};
         }
 
         // Get the existing reminder
@@ -506,16 +516,47 @@ const setStatusNotify = async ({ telegramId, key, notify, notifyNow }) => {
 
         // If both flags are true, delete the reminder
         if (reminder.isSendNotify && reminder.isSendNotifyNow) {
-            await deleteReminderById({ telegramId, reminderId: key });
+            await deleteReminderById({telegramId, reminderId: key});
             console.log(`🗑 Reminder deleted automatically after status update: ${key}`);
         }
 
-        return { success: true };
+        return {success: true};
     } catch (error) {
         console.error("❌ Error updating reminder status:", error);
-        return { success: false, error: "Database error" };
+        return {success: false, error: "Database error"};
     }
 };
+
+const fullInfoUser = async ({telegramId}) => {
+    try {
+        const user = await User.findOne({telegramId});
+
+        if (!user) {
+            return {success: false, error: '❌ User not found.'};
+        }
+        const reminderBeforeText = {
+            '5M': '5 минут',
+            '1H': '1 час',
+            '1D': '1 день'
+        }[user.reminderBefore] || 'Не указано';
+
+        const userInfoMessage = `
+📋 *Информация о пользователе:*
+
+👤 *Telegram ID:* ${user.telegramId}
+🕒 *Таймзона:* ${user.timezone}
+⏰ *Напоминать за:* ${reminderBeforeText}
+📊 *Всего напоминаний:* ${user.countReminders}
+🔔 *Актуальных напоминаний:* ${user.countExistsReminders}
+        `.trim();
+
+        return {success: true, message: userInfoMessage};
+    } catch (error) {
+        console.error("❌ Error fetching user info:", error);
+        return {success: false, error: '❌ Ошибка получения информации о пользователе.'};
+    }
+};
+
 
 module.exports = {
     registerUser,
@@ -525,5 +566,6 @@ module.exports = {
     deleteReminder,
     sendScheduledMessages,
     updateReminderBefore,
-    updateTimezone
+    updateTimezone,
+    fullInfoUser
 };

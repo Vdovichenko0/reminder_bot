@@ -3,7 +3,7 @@ const registrationWizard = require('./registrationWizard');
 const addReminderScene = require('./addReminderScene');
 const settingsWizard = require("./settingsWizard")
 const adminMediaScene  = require('./adminMediaScene');
-const { getAllReminders, deleteReminder, sendScheduledMessages} = require('../user/service/userService');
+const { getAllReminders, deleteReminder, sendScheduledMessages, fullInfoUser} = require('../user/service/userService');
 const User = require('../user/model/User');
 require('dotenv').config();
 const TG_TOKEN = process.env.TG_TOKEN;
@@ -11,8 +11,6 @@ const ADMIN_ID = process.env.ADMIN_TG;
 const ADMIN_COMMAND = process.env.ADMIN_MESSAGE;
 const ADMIN_COMMAND_MEDIA = process.env.ADMIN_COMMAND_MEDIA;
 const MY_URL = process.env.MY_URL;
-
-//todo auto reconnect if error - for deploy TG
 
 if (!TG_TOKEN) {
     console.error('❌ TG_TOKEN is not set in environment');
@@ -181,6 +179,20 @@ botTest.command('hello', async (ctx) => {
 botTest.command('keyboard', async (ctx) => {
     ctx.reply("🚀",mainMenuKeyboard);
 });
+
+
+//full info user
+botTest.command('profile', async (ctx) => {
+    const telegramId = ctx.from.id.toString();
+    const result = await fullInfoUser({ telegramId });
+
+    if (!result.success) {
+        return ctx.reply(result.error, { reply_markup: mainMenuKeyboard });
+    }
+
+    return ctx.reply(result.message, { parse_mode: 'Markdown' , mainMenuKeyboard});
+});
+
 
 setInterval(() => {
     sendScheduledMessages(botTest);

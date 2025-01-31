@@ -44,6 +44,14 @@ const userSchema = new mongoose.Schema({
         enum: ['5M', '1H', '1D'],
         default: '1H',
     },
+    countReminders:{
+        type: Number,
+        default: 0
+    },
+    countExistsReminders:{
+        type: Number,
+        default: 0
+    },
     reminders: {
         type: Map,
         of: {
