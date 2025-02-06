@@ -8,7 +8,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
-const connectDB = require('./config/db');
+const connectDB = require('./src/config/db');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const botRoutes = require('./routes/tg-bot');
@@ -30,7 +30,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/bot', botRoutes);
 
-require('./bot/bot');
+require('./src/bot/bot');
 
 app.set('trust proxy', 1);
 

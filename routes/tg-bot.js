@@ -2,7 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors'); // Если необходимо разрешить CORS
-const { addReminder } = require('../user/service/userService');
+const { addReminder } = require('../src/user/service/userService');
 
 const app = express();
 
