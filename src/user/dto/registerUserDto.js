@@ -1,4 +1,4 @@
-const { Language, ReminderBefore } = require('../../../middleware/constants');
+const { Language, ReminderBefore } = require('../../middleware/constants');
 const moment = require('moment-timezone');
 class RegisterUserDto {
     constructor({ telegramId, firstName, lastName, username, phoneNumber, language = Language.RU, reminderBefore = ReminderBefore.ONE_HOUR, timezone, isBot, languageCode }) {
